@@ -1,3 +1,94 @@
+# UE4.27 Read-Only Fork Status
+
+This fork contains a **UE 4.27-focused, read-only Blueprint introspection port** of the original `flopperam/unreal-engine-mcp` plugin.
+
+## Current state of this fork
+
+- Target: **Unreal Engine 4.27.x**
+- Status: **experimental but working for read-only Blueprint inspection**
+- Scope: **Blueprint introspection only**
+- Editing/writing Blueprint graphs: **disabled on purpose in this fork**
+
+This fork was created to make the Unreal-side plugin usable on an older UE4 project without trying to preserve the full UE5.5+ Blueprint editing toolchain.
+
+## What works in this fork
+
+After compiling the plugin and opening the editor, the Unreal-side bridge listens on:
+
+- `127.0.0.1:55557`
+
+Implemented / verified commands:
+
+- `ping`
+- `read_blueprint_content`
+- `analyze_blueprint_graph`
+- `get_blueprint_variable_details`
+- `get_blueprint_function_details`
+
+What these commands can currently inspect:
+
+- Blueprint name and parent class
+- variables and variable types
+- function list and approximate graph size
+- Event Graph / function graphs
+- nodes, node titles, node classes
+- pins, pin directions, pin types
+- pin-to-pin connections
+- components from `SimpleConstructionScript`
+- implemented interfaces
+
+## What is intentionally disabled
+
+This fork does **not** currently support Blueprint mutation on UE4.27.
+
+Write/edit commands are kept only as **read-only stubs** for future compatibility work. They return an explicit error indicating that the command is disabled in this integration.
+
+Examples of disabled areas:
+
+- create Blueprint
+- add / remove / connect nodes
+- create / edit variables
+- create / edit functions
+- compile Blueprint
+- material / physics Blueprint write helpers
+
+## How the fork was changed
+
+The original repository contains a large UE5.5+ oriented feature set, including Blueprint editing, graph mutation, and helper code that depends on newer editor behavior.
+
+This fork takes a different approach:
+
+1. **Trim the Unreal plugin down to a minimal editor-only module**
+2. **Keep only the read-only Blueprint inspection command set**
+3. **Preserve write command names as explicit stubs instead of silently removing them**
+4. **Use older UE4-friendly editor APIs for asset / graph inspection**
+5. **Sync the same reduced plugin implementation into both copies shipped by the repo**:
+   - `UnrealMCP/`
+   - `FlopperamUnrealMCP/Plugins/UnrealMCP/`
+
+## Important limitations
+
+- This fork is **not** a drop-in replacement for the full upstream UE5.5+ feature set.
+- Large Blueprints can return very heavy responses; narrower graph/function queries are recommended.
+- Function parameter defaults and advanced metadata are not fully extracted yet.
+- The Python/server side from upstream may still describe broader capabilities than this UE4-specific Unreal plugin currently provides.
+
+## Recommended usage pattern
+
+For large production Blueprints, prefer this order:
+
+1. `get_blueprint_variable_details`
+2. `get_blueprint_function_details`
+3. `read_blueprint_content`
+4. `analyze_blueprint_graph` for a specific graph/function
+
+## Compatibility note
+
+The upstream README below still describes the broader original project and its UE5.5+ feature set.
+For this branch/fork, treat the section above as the **authoritative status** of the UE4.27 read-only port.
+
+---
+
 ## Update 02/14/2026
 
 ---
